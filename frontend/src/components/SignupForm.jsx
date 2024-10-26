@@ -6,12 +6,13 @@ const SignupForm = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
-  const [isadmin, setIsadmin] = useState(false);
+  const [role, setRole] = useState("");
   const [error, setError] = useState("");
   const history = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log("e", email, role);
 
     try {
       const response = await axios.post(
@@ -20,12 +21,10 @@ const SignupForm = () => {
           username,
           email,
           password,
-          isAdmin: isadmin,
+          role,
         }
       );
-      console.log("res", response.status);
-      console.log("errrororoor", response.status.error);
-
+      console.log(response);
       if (response.status === 400) {
         setError(response.data.error);
       } else {
@@ -90,16 +89,14 @@ const SignupForm = () => {
             </div>
 
             <div className="mb-4">
-              <label className="block mb-2 text-sm font-medium">
-                Admin Role
-              </label>
+              <label className="block mb-2 text-sm font-medium">Role</label>
               <select
-                value={isadmin}
-                onChange={(e) => setIsadmin(e.target.value)}
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
                 className="w-full px-3 py-2 rounded bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option value="false">User</option>
-                <option value="true">Admin</option>
+                <option value="player">Player</option>
+                <option value="admin">Admin</option>
               </select>
             </div>
 

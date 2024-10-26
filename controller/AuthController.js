@@ -3,7 +3,8 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/userModel");
 
 exports.registerUser = async (req, res) => {
-  const { username, email, password } = req.body;
+  const { username, email, password, role } = req.body;
+  console.log("body", req.body);
 
   try {
     const existingUser = await User.findOne({ username });
@@ -15,12 +16,19 @@ exports.registerUser = async (req, res) => {
       username,
       password: hashedPassword,
       email,
+      role,
     });
-
+    console.log("ser", newUser);
     await newUser.save();
 
     const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, {
       expiresIn: "1h",
+    });
+    res.cookie("jwt", token, {
+      httpOnly: false,
+      secure: false,
+      sameSite: "lax",
+      path: "/",
     });
     res.status(201).json({ message: "User registered successfully", token });
   } catch (error) {
@@ -40,10 +48,18 @@ exports.loginUser = async (req, res) => {
       return res.status(400).json({ error: "Invalid password" });
 
     const token = jwt.sign(
-      { username: user.username },
+      { user: { id: user._id, role: user.role } },
       process.env.JWT_SECRET,
-      { expiresIn: "1h" }
+      {
+        expiresIn: "1h",
+      }
     );
+    res.cookie("jwt", token, {
+      httpOnly: false,
+      secure: false,
+      sameSite: "lax",
+      path: "/",
+    });
     res.json({ token, username: user.username });
   } catch (error) {
     res.status(500).json({ error: "Internal server error" });
@@ -61,6 +77,9 @@ exports.getUsers = async (req, res) => {
 };
 
 exports.logout = async (req, res) => {
+  if (!req.cookies.jwt) {
+    res.status(200).json({ message: "User not autenticated" });
+  }
   try {
     res.clearCookie("jwt");
     res.status(200).json({ message: "User logged out successfully" });

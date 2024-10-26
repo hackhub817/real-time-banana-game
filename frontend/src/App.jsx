@@ -1,25 +1,31 @@
 import React from "react";
-import {
-  BrowserRouter as Router,
-  Route,
-  Routes,
-  Navigate,
-} from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
 import SignupForm from "./components/SignupForm";
-import Cookies from "js-cookie";
 import LoginForm from "./components/LoginFom";
-import Dashboard from "./components/Dashboard";
+
+import PlayerDashboard from "./components/PlayerDashboard";
+import AdminDashboard from "./components/AdminDashboard";
+import ProtectedRoute from "./components/ProtectedRoute";
+import RankPage from "./components/RankPage";
 
 const App = () => {
-  const token = Cookies.get("token");
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<SignupForm />} />
-        <Route path="/login" element={<LoginForm />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-      </Routes>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<SignupForm />} />
+          <Route path="/login" element={<LoginForm />} />
+          <Route path="/rank" element={<RankPage />} />
+          <Route element={<ProtectedRoute requiredRole="admin" />}>
+            <Route path="/admin" element={<AdminDashboard />} />
+          </Route>
+          <Route element={<ProtectedRoute requiredRole="player" />}>
+            <Route path="/playerdashboard" element={<PlayerDashboard />} />
+          </Route>
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 };
 
