@@ -3,11 +3,24 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import axios from "axios";
 
-const Navbar = () => {
+const Navbar = ({ bananaCount }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
+    console.log("ajsdhf", user.id, bananaCount);
+    try {
+      await axios.post(
+        `http://localhost:5000/api/admin/updateBananaCount`,
+        { userId: user.id, bananaCount },
+        { withCredentials: true }
+      );
+    } catch (error) {
+      console.error(
+        "Error logging out:",
+        error.response ? error.response.data : error.message
+      );
+    }
     try {
       await axios.get(`http://localhost:5000/api/auth/logout`, {
         withCredentials: true,
@@ -29,15 +42,15 @@ const Navbar = () => {
         <div className="flex space-x-4">
           {user?.role === "admin" && (
             <>
-              <Link to="/create-user" className="hover:underline">
+              <Link to="/create-player" className="hover:underline">
                 Create Users
               </Link>
-              <Link to="/block-user" className="hover:underline">
+              <Link to="/block-player" className="hover:underline">
                 Block User
               </Link>
             </>
           )}
-          <Link to="/rank" className="hover:underline">
+          <Link to="/leaderboard" className="hover:underline">
             Leaderboard
           </Link>
           <button onClick={handleLogout} className="hover:underline">

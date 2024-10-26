@@ -26,10 +26,16 @@ const LoginForm = () => {
           },
         }
       );
-      setError("");
-      login(response.data.token);
-      console.log("reached");
-      navigate("/playerdashboard");
+      console.log("blco", response.data.user.isBlocked);
+      if (response.data.user.isBlocked === true) {
+        setError("You are blocked by admin");
+        navigate("/login");
+      } else {
+        setError("");
+        login(response.data.token);
+        console.log("reached");
+        navigate("/playerdashboard");
+      }
     } catch (err) {
       if (err.response && err.response.data) {
         setError(err.response.data.error || "Login failed. Please try again.");

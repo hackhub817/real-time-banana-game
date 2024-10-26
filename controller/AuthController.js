@@ -21,15 +21,6 @@ exports.registerUser = async (req, res) => {
     console.log("ser", newUser);
     await newUser.save();
 
-    const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, {
-      expiresIn: "1h",
-    });
-    res.cookie("jwt", token, {
-      httpOnly: false,
-      secure: false,
-      sameSite: "lax",
-      path: "/",
-    });
     res.status(201).json({ message: "User registered successfully", token });
   } catch (error) {
     res.status(500).json({ error: "Internal server error" });
@@ -48,10 +39,10 @@ exports.loginUser = async (req, res) => {
       return res.status(400).json({ error: "Invalid password" });
 
     const token = jwt.sign(
-      { user: { id: user._id, role: user.role } },
+      { user: { id: user._id, role: user.role, name: user.username } },
       process.env.JWT_SECRET,
       {
-        expiresIn: "1h",
+        expiresIn: "12h",
       }
     );
     res.cookie("jwt", token, {
@@ -60,7 +51,7 @@ exports.loginUser = async (req, res) => {
       sameSite: "lax",
       path: "/",
     });
-    res.json({ token, username: user.username });
+    res.json({ token, user: user });
   } catch (error) {
     res.status(500).json({ error: "Internal server error" });
   }

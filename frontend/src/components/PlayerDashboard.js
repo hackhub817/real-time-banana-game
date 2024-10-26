@@ -1,14 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { io } from "socket.io-client";
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
-import RankPage from "./RankPage";
 import Navbar from "./Navbar";
 
 const PlayerDashboard = () => {
-  const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const [bananaCount, setBananaCount] = useState(0);
   const [players, setPlayers] = useState([]);
   const [socket, setSocket] = useState(null);
@@ -24,10 +20,24 @@ const PlayerDashboard = () => {
 
       newSocket.on("update_banana_counts", (data) => {
         console.log("Received data from server:", data);
-        setPlayers(Object.entries(data));
+
+        const formattedPlayers = Object.entries(data).map(
+          ([playerId, playerData]) => ({
+            id: playerId,
+            name: playerData.name,
+            count: playerData.count,
+          })
+        );
+
+        const sortedPlayers = formattedPlayers.sort(
+          (a, b) => b.count - a.count
+        );
+
+        setPlayers(sortedPlayers);
+
         const currentUserData = data[user.id];
-        if (currentUserData !== undefined) {
-          setBananaCount(currentUserData);
+        if (currentUserData) {
+          setBananaCount(currentUserData.count);
         }
       });
 
@@ -54,7 +64,7 @@ const PlayerDashboard = () => {
 
   return (
     <>
-      <Navbar />
+      <Navbar bananaCount={bananaCount} />
       <div className="min-h-screen bg-gray-900 text-white p-8">
         <h2 className="text-4xl font-bold mb-6">Player Dashboard</h2>
         <div className="bg-gray-800 rounded-lg p-6 shadow-md mb-8">
@@ -69,7 +79,24 @@ const PlayerDashboard = () => {
           </p>
         </div>
 
-        <RankPage players={players} />
+        <div className="bg-gray-800 rounded-lg p-6 shadow-md">
+          <h3 className="text-2xl font-bold mb-4">Players</h3>
+          <ul className="space-y-2">
+            {players.length > 0 ? (
+              players.map((player) => (
+                <li
+                  key={player.id}
+                  className="flex justify-between border-b border-gray-700 pb-2"
+                >
+                  <span className="text-lg">{player.name}</span>
+                  <span className="font-bold">{player.count} bananas</span>
+                </li>
+              ))
+            ) : (
+              <p className="text-gray-400">No players available yet.</p>
+            )}
+          </ul>
+        </div>
       </div>
     </>
   );

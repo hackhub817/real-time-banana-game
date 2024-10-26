@@ -1,91 +1,82 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { jwtDecode } from "jwt-decode";
-import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { io } from "socket.io-client";
 import Navbar from "./Navbar";
 
-const AdminDashboard = () => {
+const PlayerDashboard = () => {
+  const { user } = useAuth();
+  const [bananaCount, setBananaCount] = useState(0);
   const [players, setPlayers] = useState([]);
-  const [user, setUser] = useState(null);
-  const { logout } = useAuth();
-  const navigate = useNavigate();
+  const [socket, setSocket] = useState(null);
 
   useEffect(() => {
-    const fetchPlayers = async () => {
-      const response = await axios.get(
-        "http://localhost:5000/api/admin/players",
-        {
-          withCredentials: true,
-          headers: {
-            "Content-Type": "application/json",
-          },
+    if (user && user.id) {
+      const newSocket = io("http://localhost:5000");
+      setSocket(newSocket);
+
+      newSocket.on("connect", () => {
+        console.log("Socket connected:", newSocket.id);
+      });
+
+      newSocket.on("update_banana_counts", (data) => {
+        console.log("Received data from server:", data);
+
+        const formattedPlayers = Object.entries(data).map(
+          ([playerId, playerData]) => ({
+            id: playerId,
+            name: playerData.name,
+            count: playerData.count,
+          })
+        );
+
+        const sortedPlayers = formattedPlayers.sort(
+          (a, b) => b.count - a.count
+        );
+
+        setPlayers(sortedPlayers);
+
+        const currentUserData = data[user.id];
+        if (currentUserData) {
+          setBananaCount(currentUserData.count);
         }
-      );
-      console.log(response.data.players);
-      setPlayers(response.data.players);
-    };
-    fetchPlayers();
-  }, []);
+      });
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      try {
-        const decoded = jwtDecode(token);
-        setUser(decoded.user);
-      } catch (err) {
-        logout(navigate);
-      }
+      newSocket.on("disconnect", () => {
+        console.log("Socket disconnected");
+      });
+
+      return () => {
+        newSocket.off("update_banana_counts");
+        newSocket.disconnect();
+      };
     }
-  }, [navigate]);
+  }, [user]);
 
-  const handleBlock = async (playerId) => {
-    await await axios.patch(
-      `http://localhost:5000/admin/player/${playerId}/block`,
-      {},
-      {
-        withCredentials: true,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
-    setPlayers(players.filter((player) => player._id !== playerId));
-  };
-
-  if (!user || user.role !== "admin") {
-    return <h2>You are not authorized to view this page.</h2>;
-  }
   return (
     <>
-      <Navbar />
+      <Navbar bananaCount={bananaCount} />
       <div className="min-h-screen bg-gray-900 text-white p-8">
-        <h2 className="text-4xl font-bold mb-6">Admin Dashboard</h2>
-        <h3 className="text-2xl font-semibold mb-4">Active Players</h3>
-        <ul className="bg-gray-800 rounded-lg p-6 shadow-md space-y-4">
-          {players && players.length > 0 ? (
-            players.map((player) => (
-              <li
-                key={player._id}
-                className="flex justify-between items-center border-b border-gray-700 pb-2"
-              >
-                <span className="text-lg">{player.username}</span>
-                <button
-                  onClick={() => handleBlock(player._id)}
-                  className="bg-red-500 hover:bg-red-700 text-white font-semibold py-1 px-3 rounded transition duration-200"
+        <div className="bg-gray-800 rounded-lg p-6 shadow-md">
+          <h3 className="text-2xl font-bold mb-4">Active Players</h3>
+          <ul className="space-y-2">
+            {players.length > 0 ? (
+              players.map((player) => (
+                <li
+                  key={player.id}
+                  className="flex justify-between border-b border-gray-700 pb-2"
                 >
-                  Block
-                </button>
-              </li>
-            ))
-          ) : (
-            <li className="text-gray-400">No players found.</li>
-          )}
-        </ul>
+                  <span className="text-lg">{player.name}</span>
+                  <span className="font-bold">{player.count} bananas</span>
+                </li>
+              ))
+            ) : (
+              <p className="text-gray-400">No players available yet.</p>
+            )}
+          </ul>
+        </div>
       </div>
     </>
   );
 };
 
-export default AdminDashboard;
+export default PlayerDashboard;

@@ -8,6 +8,7 @@ const adminRoutes = require("./routes/adminRoute");
 const authRoutes = require("./routes/authRoutes");
 const path = require("path");
 const cookieParser = require("cookie-parser");
+const User = require("./models/userModel");
 
 dotenv.config();
 
@@ -42,11 +43,24 @@ let playerStats = {};
 io.on("connection", (socket) => {
   console.log("New client connected");
 
-  socket.on("banana_click", (userId) => {
-    if (!playerStats[userId]) playerStats[userId] = 0;
-    playerStats[userId]++;
-    console.log("Emitting updated player stats:", playerStats);
-    io.emit("update_banana_counts", playerStats);
+  socket.on("banana_click", async (userId) => {
+    try {
+      if (!playerStats[userId]) {
+        const user = await User.findById(userId).select("username");
+        if (user) {
+          playerStats[userId] = { name: user.username, count: 0 };
+        } else {
+          console.error(`User with ID ${userId} not found.`);
+          return;
+        }
+      }
+
+      playerStats[userId].count++;
+      console.log("Emitting updated player stats:", playerStats);
+      io.emit("update_banana_counts", playerStats);
+    } catch (error) {
+      console.error("Error handling banana_click:", error);
+    }
   });
 
   socket.on("disconnect", () => {

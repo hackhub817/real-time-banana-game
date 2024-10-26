@@ -5,6 +5,7 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   isBlocked: { type: Boolean, default: false },
+  bananaCount: { type: Number, default: 0 },
   role: { type: String, enum: ["admin", "player"], default: "player" },
 });
 
