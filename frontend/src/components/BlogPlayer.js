@@ -13,7 +13,7 @@ const BlogPlayer = () => {
     const fetchPlayers = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:5000/api/admin/players",
+          `http://localhost:5000/api/admin/players`,
           {
             withCredentials: true,
             headers: {

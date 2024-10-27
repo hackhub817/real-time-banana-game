@@ -2,31 +2,34 @@ import React, { useState } from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useNavigate } from "react-router-dom";
 
 const CreatePlayer = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/auth/register",
+        `http://localhost:5000/api/auth/register`,
         {
           username,
           email,
           password,
         }
       );
-
+      console.log(response);
       if (response.status === 201) {
         toast.success("Player created successfully!");
       } else {
         toast.error("Something went wrong!");
         toast.error("May be user alreday exist");
       }
+      navigate("/block-player");
     } catch (error) {
       const errorMessage =
         error.response?.data?.error || "Creation failed. Please try again.";

@@ -7,9 +7,9 @@ exports.registerUser = async (req, res) => {
   console.log("body", req.body);
 
   try {
-    const existingUser = await User.findOne({ username });
+    const existingUser = await User.findOne({ email });
     if (existingUser)
-      return res.status(200).json({ error: "Username already exists" });
+      return res.status(200).json({ error: "User already exists" });
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = new User({
@@ -21,7 +21,7 @@ exports.registerUser = async (req, res) => {
     console.log("ser", newUser);
     await newUser.save();
 
-    res.status(201).json({ message: "User registered successfully", token });
+    res.status(201).json({ message: "User registered successfully", newUser });
   } catch (error) {
     res.status(500).json({ error: "Internal server error" });
   }

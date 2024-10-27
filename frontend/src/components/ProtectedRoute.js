@@ -14,7 +14,7 @@ const ProtectedRoute = ({ requiredRole }) => {
     if (requiredRole && user.role !== requiredRole) {
       return (
         <Navigate
-          to={user.role === "admin" ? "/admin" : "/playerdashboard"}
+          to={user.role === "admin" ? "/adminDashboard" : "/playerDashboard"}
           replace
         />
       );

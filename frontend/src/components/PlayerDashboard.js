@@ -65,35 +65,53 @@ const PlayerDashboard = () => {
   return (
     <>
       <Navbar bananaCount={bananaCount} />
-      <div className="min-h-screen bg-gray-900 text-white p-8">
-        <h2 className="text-4xl font-bold mb-6">Player Dashboard</h2>
-        <div className="bg-gray-800 rounded-lg p-6 shadow-md mb-8">
+      <div className="min-h-screen bg-gray-900 text-white p-6 md:p-8 flex flex-col items-center">
+        {/* Title */}
+        <h2 className="text-3xl md:text-4xl font-bold text-yellow-400 mb-8 text-center">
+          🍌 Player Dashboard
+        </h2>
+
+        <div className="bg-gray-800 rounded-lg p-6 shadow-lg mb-8 w-full max-w-lg">
           <button
             onClick={handleClick}
-            className="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded transition duration-200"
+            className="w-full bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-3 rounded-full transition duration-200 transform hover:scale-105 text-lg"
           >
-            Banana
+            + Add Banana
           </button>
-          <p className="mt-4 text-lg">
-            Your Banana Count: <span className="font-bold">{bananaCount}</span>
+          <p className="mt-4 text-center text-xl">
+            Your Banana Count:{" "}
+            <span className="font-bold text-yellow-400">{bananaCount}</span>
           </p>
         </div>
 
-        <div className="bg-gray-800 rounded-lg p-6 shadow-md">
-          <h3 className="text-2xl font-bold mb-4">Players</h3>
-          <ul className="space-y-2">
+        <div className="bg-gray-800 rounded-lg p-6 shadow-lg w-full max-w-5xl">
+          <h3 className="text-2xl md:text-3xl font-bold mb-6 text-yellow-400 text-center">
+            🍌 Active Players
+          </h3>
+          <ul className="space-y-4">
             {players.length > 0 ? (
-              players.map((player) => (
+              players.map((player, index) => (
                 <li
                   key={player.id}
-                  className="flex justify-between border-b border-gray-700 pb-2"
+                  className="flex justify-between items-center p-4 bg-gray-700 rounded-md hover:bg-gray-600 transition duration-200"
                 >
-                  <span className="text-lg">{player.name}</span>
-                  <span className="font-bold">{player.count} bananas</span>
+                  <div className="flex items-center">
+                    <span className="text-xl font-semibold text-yellow-300 mr-4">
+                      #{index + 1}
+                    </span>
+                    <span className="text-lg font-medium text-white">
+                      {player.name}
+                    </span>
+                  </div>
+                  <span className="text-lg font-semibold text-green-400">
+                    {player.count} 🍌
+                  </span>
                 </li>
               ))
             ) : (
-              <p className="text-gray-400">No players available yet.</p>
+              <p className="text-gray-400 text-center">
+                No players available yet.
+              </p>
             )}
           </ul>
         </div>

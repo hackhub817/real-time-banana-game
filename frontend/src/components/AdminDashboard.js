@@ -55,22 +55,35 @@ const PlayerDashboard = () => {
   return (
     <>
       <Navbar bananaCount={bananaCount} />
-      <div className="min-h-screen bg-gray-900 text-white p-8">
-        <div className="bg-gray-800 rounded-lg p-6 shadow-md">
-          <h3 className="text-2xl font-bold mb-4">Active Players</h3>
-          <ul className="space-y-2">
+      <div className="min-h-screen bg-gray-900 text-white p-6 flex justify-center">
+        <div className="bg-gray-800 rounded-lg p-8 shadow-lg w-full max-w-4xl">
+          <h3 className="text-3xl font-bold text-yellow-400 text-center mb-6">
+            🍌 Active Players (Rankwise)
+          </h3>
+          <ul className="divide-y divide-gray-700 ">
             {players.length > 0 ? (
-              players.map((player) => (
+              players.map((player, index) => (
                 <li
                   key={player.id}
-                  className="flex justify-between border-b border-gray-700 pb-2"
+                  className="flex mt-2 justify-between items-center py-4 px-6 bg-gray-700 hover:bg-gray-600 rounded-md transition duration-200"
                 >
-                  <span className="text-lg">{player.name}</span>
-                  <span className="font-bold">{player.count} bananas</span>
+                  <div className="flex items-center ">
+                    <span className="text-xl font-semibold text-yellow-300 mr-3">
+                      #{index + 1}
+                    </span>
+                    <span className="text-lg font-medium text-white">
+                      {player.name}
+                    </span>
+                  </div>
+                  <span className="text-lg font-semibold text-green-400">
+                    {player.count} 🍌
+                  </span>
                 </li>
               ))
             ) : (
-              <p className="text-gray-400">No players available yet.</p>
+              <p className="text-gray-400 text-center mt-4">
+                No players available yet.
+              </p>
             )}
           </ul>
         </div>
